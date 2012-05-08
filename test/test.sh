@@ -1,7 +1,7 @@
 #!/bin/sh
 
 pwd
-. ../sh.maxwell
+. ../sh.adow_streamer
 
 wrap_level stdout ./stdout
 wrap_level stderr ./stderr

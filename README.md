@@ -1,6 +1,9 @@
-sh.maxwell
-==========
+sh.adow-streamer
+================
 
 Logging implementation for SHELL-scripts.
 
-[WARNING] The name of this script is going to be changed when better and appropriate name would be found.
+Usage: Include this library in your script and then call corresponding
+functions in order to initialize all necessary redirection. Can multiply
+output from different streams to files and stdout.
+
