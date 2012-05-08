@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+
+wrap_level() {
+    local level="${1}"
+    local path="${2}"
+    [ "${level}" = "stdout" ] && level=1
+    [ "${level}" = "stderr" ] && level=2
+    eval loglevel${1} "${2}"
+}
+
+loglevel1() { exec 1>"${1}"; }
+loglevel2() { exec 2>"${1}"; }
+loglevel3() { exec 3>"${1}"; }
+loglevel4() { exec 4>"${1}"; }
+loglevel5() { exec 5>"${1}"; }
+loglevel6() { exec 6>"${1}"; }
+loglevel7() { exec 7>"${1}"; }
+loglevel8() { exec 8>"${1}"; }
+loglevel9() { exec 9>"${1}"; }
+
