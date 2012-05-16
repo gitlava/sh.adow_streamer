@@ -1,9 +1,37 @@
 #!/bin/sh
-#
+
+if [ "${1}" = "shadow_tracker" ]
+then
+    shift # Shadow tracker mode activated and this option is no more required
+
+    # Declare cleanup function and set trap
+    # to remove all temporary files at exit
+    tracker_cleanup() { rm -f "${FIFO}"; exit 0; }
+    trap tracker_cleanup INT HUP TERM
+
+    # FIFO is a FIFO-channel to get output of the target application
+    FIFO="${1}"
+
+    shift # FIFO is stored, other parameters are supposed to be targets
+
+    # Main program cycle to track output and retranslate it to the desired
+    # locations
+    while read line
+    do
+        for i in $(seq 1 $#)
+        do
+            TARGET=$(eval ${${i}})
+            echo "${line}" >>"${TARGET}"
+        done
+    done <"${FIFO}"
+
+    exit 0
+fi
 
 wrap_level() {
     local level="${1}"
-    local path="${2}"
+    shift
+
     [ "${level}" = "stdout" ] && level=1
     [ "${level}" = "stderr" ] && level=2
     eval loglevel${1} "${2}"
