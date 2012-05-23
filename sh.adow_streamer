@@ -1,8 +1,11 @@
 #!/bin/sh
+#
 
-if [ "${1}" = "shadow_tracker" ]
+# Shadow Tracker will read produced output from the FIFO and pass it to
+# the external locations
+if [ "${1}" = "track" ]
 then
-    shift # Shadow tracker mode activated and this option is no more required
+    shift # Shadow tracker mode activated and this option is no longer required
 
     # Declare cleanup function and set trap
     # to remove all temporary files at exit
@@ -28,15 +31,44 @@ then
     exit 0
 fi
 
+# This function starts logging for the specified level
 wrap_level() {
     local level="${1}"
-    shift
+    shift # Level stored, all remaining params supposed to be target outputs
 
+    # Check level redirection
     [ "${level}" = "stdout" ] && level=1
     [ "${level}" = "stderr" ] && level=2
-    eval loglevel${1} "${2}"
+
+    # Level should be a single digit
+    if ! { echo "${level}" | grep -q '^[0-9]$'; }
+    then
+        echo "Wrong level: '${level}'"
+        return 0;
+    fi
+
+    # Generate targets to pass for redirection
+    TARGETS=
+    for target in "${@}"
+    do
+        case "${target}" in
+            stdout)
+                TARGETS="${TARGETS} $(tty)"
+                ;;
+            stderr)
+                TARGETS="${TARGETS} $(tty)"
+                ;;
+            *)
+                TARGETS="${TARGETS} ${target}"
+                ;;
+        esac
+    done
+
+    eval loglevel${level} "${@}"
 }
 
+# Shell can't extend `exec $level>$path' so we require separate functions in
+# order to emulate this work
 loglevel1() { exec 1>"${1}"; }
 loglevel2() { exec 2>"${1}"; }
 loglevel3() { exec 3>"${1}"; }
