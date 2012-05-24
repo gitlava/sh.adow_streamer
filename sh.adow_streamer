@@ -54,6 +54,10 @@
 # ===     script and to error.log, and to debug.log                         ===
 ################################################################################
 
+# Shadow Tracker is a part of the sh.adow_streamer functionality
+# There will be one Tracker for every output level launched from the time of
+# sh.adow_streamer usage and until your script is finished
+#
 # Shadow Tracker will read produced output from the FIFO and pass it to
 # the external locations
 if [ "${1}" = "track" ]
