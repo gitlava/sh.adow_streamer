@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 
-################################################################################
+### LICENSE ####################################################################
 # Copyright (c) 2012, Eugene 'lava' Lavnikevich
 # All rights reserved.
 # 
@@ -30,6 +30,29 @@
 # either expressed or implied, of the FreeBSD Project.
 ################################################################################
 
+### DESCRIPTION ################################################################
+# Script to add logging functionality into other scripts with possibilities to
+# setup different levels and different output directions.
+#
+# This shell-script is developed as a "library" for other scripts, but not as a
+# standalone application.
+################################################################################
+
+### USAGE EXAMPLE ##############################################################
+# === Somewhere in your script                                              ===
+# . /usr/local/lib/sh.adow/sh.adow_streamer
+# log_level 1 stdout
+# log_level 3 stderr debug.log
+# log_level 2 stderr errors.log debug.log
+# === From this moment redirection working until the end of your script     ===
+# === It works for every running application which can give output to       ===
+# === stdout or/and stderr or/and level3:                                   ===
+# === - stdout of every command will continue to be produced on screen      ===
+# === - level 3 is supposed to be debug level and will go to stderr and     ===
+# ===     to the file debug.log                                             ===
+# === - stderr of every command will go to the stderr stream of your        ===
+# ===     script and to error.log, and to debug.log                         ===
+################################################################################
 
 # Shadow Tracker will read produced output from the FIFO and pass it to
 # the external locations
@@ -63,7 +86,8 @@ fi
 
 # Set up logging for specified channel
 # Args: LEVEL OUTPUT...
-#       LEVEL       - desired level to configure, accept 'stdout', 'stderr' and numbers
+#       LEVEL       - desired level to configure, accept 'stdout', 'stderr' and 
+#                     numbers
 #       OUTPUT...   - all desired destinations
 wrap_level() {
     local level="${1}"
