@@ -57,41 +57,6 @@ then
     echo
 fi
 
-# Shadow Tracker is a part of the sh.adow_streamer functionality
-# There will be one Tracker for every output level launched from the time of
-# sh.adow_streamer usage and until your script is finished
-#
-# Shadow Tracker will read produced output from the FIFO and pass it to
-# the external locations
-if [ "${1}" = "track" ]
-then
-    shift # Shadow tracker mode activated and this option is no longer required
-
-    # Declare cleanup function and set trap
-    # to remove all temporary files at exit
-    tracker_cleanup() { rm -f "${FIFO}"; exit 0; }
-    trap tracker_cleanup INT HUP TERM
-
-    # FIFO is a FIFO-channel to get output of the target application
-    FIFO="${1}"
-
-    shift # FIFO is stored, other parameters are supposed to be targets
-
-    # Main program cycle to track output and retranslate it to the desired
-    # locations
-    while read line
-    do
-        for i in $(seq 1 $#)
-        do
-            TARGET=$(eval ${${i}})
-            echo "${line}" >>"${TARGET}"
-        done
-    done <"${FIFO}"
-
-    exit 0
-fi
-
-
 # Shell can't extend `exec $level>$path' so we require separate functions in
 # order to emulate this work
 loglevel1() { exec 1>"${1}"; }
@@ -168,4 +133,5 @@ wrap_level() {
 #
 
 mkdir -p /tmp/sh.adow_streamer.$$
+trap "rm -rf /tmp/sh.adow_streamer.$$" EXIT
 
