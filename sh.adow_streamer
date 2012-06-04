@@ -120,6 +120,7 @@ wrap_level() {
     echo "${prefix}" >"/tmp/${STREAMER_BNAME}.$$/${level}/prefix"
 
     # Generate targets to pass for redirection.
+    : >"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
     for target in "${@}"
     do
         case "${target}" in
@@ -133,14 +134,16 @@ wrap_level() {
     done
 
     # Create FIFO and initialize redirection.
-    eval loglevel${level} "${@}"
+    mkfifo "/tmp/${STREAMER_BNAME}.$$/${level}/fifo"
+    eval "loglevel${level}" "/tmp/${STREAMER_BNAME}.$$/${level}/fifo"
+    /usr/lib/sh.adow/sh.adow_tracker "/tmp/${STREAMER_BNAME}.$$/${level}"
 }
 
 
 # Initialization and setting traps
 # Working directory structure example
 #
-# sh.adow_streamer.6382/
+# /tmp/sh.adow_streamer.6382/
 # ├── 1
 # │   ├── fifo
 # │   ├── prefix
