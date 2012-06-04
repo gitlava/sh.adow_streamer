@@ -38,27 +38,39 @@
 # standalone application.
 ################################################################################
 
+# First of all, prevent stand-alone launch of the script
 STREAMER_BNAME='sh.adow_streamer'
 if ps wweo pid,cmd | grep -q "^\s*$$.*${STREAMER_BNAME}"
 then
-    echo Usage example:
-    echo . /usr/local/lib/sh.adow/sh.adow_streamer
-    echo log_level 1 -
-    echo log_level 3 - debug.log
-    echo log_level 2 - errors.log debug.log
-    echo   From this moment redirection working until the end of your script
-    echo   It works for every running application which can give output to
-    echo   stdout or/and stderr or/and level3:
-    echo   - stdout of every command will continue to be produced on screen
-    echo   - level 3 is supposed to be debug level and will go to screen and
-    echo     to the file debug.log
-    echo   - stderr of every command will go to the stderr stream of your
-    echo     script and to error.log, and to debug.log
-    echo
+    cat <<EOUSAGE
+Script to add logging functionality into other scripts with possibilities to 
+setup different levels and different output directions.
+
+This shell-script is developed as a "library" for other scripts, but not as a 
+standalone application.
+
+Usage example:
+
+. /usr/local/lib/sh.adow/sh.adow_streamer
+log_level 1 -
+log_level 3 - debug.log
+log_level 2 - errors.log debug.log
+
+From this moment redirection works until the end of your script. It works 
+for every running application which can give output to stdout or/and stderr 
+or/and level3:
+  - stdout of every command will continue to be produced on screen;
+  - level 3 is supposed to be debug level and will go to screen and to the
+    file debug.log;
+  - stderr of every command will go to the console of your script and to
+    files error.log, debug.log.
+
+EOUSAGE
+
+    exit 1
 fi
 
-# Shell can't extend `exec $level>$path' so we require separate functions in
-# order to emulate this work
+# Workaround for the issue when shell is unable to extend `exec $level>$path'.
 loglevel1() { exec 1>"${1}"; }
 loglevel2() { exec 2>"${1}"; }
 loglevel3() { exec 3>"${1}"; }
@@ -71,40 +83,56 @@ loglevel9() { exec 9>"${1}"; }
 
 # Set up logging for specified channel
 # Args: LEVEL OUTPUT...
-#       LEVEL         - number, desired level to configure
-#       OUTPUT...     - path where output should be going
-#                       put '-' to copy out to the tty (where stdin points)
+#       LEVEL         - Number, desired level to configure.
+#       OUTPUT...     - Path(s) where output should be going;
+#                       Put '-' to copy out to the tty (where stdin points);
+#                       '--' could be placed in the beginning of OUTPUT...
+#                       in order to close level and not prevent producing
+#                       of any output.
 wrap_level() {
     local level="${1}"
-    shift # Level stored, all remaining params supposed to be target outputs
+    shift # Level stored, all remaining params supposed to be target outputs.
 
-    # Level should be a single digit and couldn't be stdio
+    # Level should be a single digit and couldn't be stdio.
     if ! { echo "${level}" | grep -q '^[1-9]$'; }
     then
         echo "[ERROR] Redirection of level '${level}' averted: incorrect level" >&2
         return 0;
     fi
 
-    # Check if descriptor should be closed at all
+    # Check if the descriptor should be closed at all.
+    # Note: by closing I mean redirection to null because some application
+    # would fail to work if standard descroptors are simply closed.
     if [ "$1" = "--" ]
     then
         eval loglevel${level} /dev/null
+        return
     fi
 
-    # Generate targets to pass for redirection
-    TARGETS=
+    local prefix="${SH_PREFIX}"
+    # Set prefix if specified
+    if [ "$1" = "-p" ]
+    then
+        prefix=$2
+        shift; shift
+    fi
+
+    echo "${prefix}" >"/tmp/${STREAMER_BNAME}.$$/${level}/prefix"
+
+    # Generate targets to pass for redirection.
     for target in "${@}"
     do
         case "${target}" in
             -)
-                TARGETS="${TARGETS} $(tty)"
+                tty 2>/dev/null >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
                 ;;
             *)
-                TARGETS="${TARGETS} ${target}"
+                echo "${target}" >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
                 ;;
         esac
     done
 
+    # Create FIFO and initialize redirection.
     eval loglevel${level} "${@}"
 }
 
@@ -132,6 +160,6 @@ wrap_level() {
 #      targets_list     contains output directions
 #
 
-mkdir -p /tmp/sh.adow_streamer.$$
-trap "rm -rf /tmp/sh.adow_streamer.$$" EXIT
+mkdir -p "/tmp/${STREAMER_BNAME}.$$"
+trap "rm -rf /tmp/${STREAMER_BNAME}.$$" EXIT
 
