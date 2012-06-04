@@ -1,6 +1,6 @@
 #!/bin/sh
 #
- 
+
 ### LICENSE ####################################################################
 # Copyright (c) 2012, Eugene 'lava' Lavnikevich
 # All rights reserved.
@@ -31,24 +31,31 @@
 ################################################################################
 
 ### DESCRIPTION ################################################################
-# Shadow Tracker is a part of the sh.adow_streamer functionality
-# There will be one Tracker for every output level launched from the time of
-# sh.adow_streamer usage and until your script is finished
+# Shadow Tracker is a part of the sh.adow_streamer functionality. There will be
+# one Tracker for every output level wrapped with the Shadow Streamer until your
+# script is finished.
 #
 # Shadow Tracker will read produced output from the FIFO and pass it to
 # the external locations
+#
+# Shadow Tracker is not supposed to be runned stand-alone. It have been designed
+# only as a part of Shadow Streamer, though you can adapt it for your needs.
 ################################################################################
 
-# 
+[ -d "${1}" ] || { echo "Wrong usage of Shadow Tracker." >&2; exit 1 }
+
+SHADOW_LEVEL="${1}"
+TARGETS=$(cat "${SHADOW_LEVEL}"/targets)
+PREFIX=$(cat "${SHADOW_LEVEL}"/prefix)
 
 # Main program cycle to track output and retranslate it to the desired
 # locations
-while read line
+while read line <"${SHADOW_LEVEL}"/fifo
 do
-    for i in $(seq 1 $#)
-    do
-        TARGET=$(eval ${${i}})
-        echo "${line}" >>"${TARGET}"
-    done
-done <"${FIFO}"
+    echo "${TARGETS}" | \
+        while read target
+        do
+            eval echo "${prefix}""${line}" >>"${taget}"
+        done
+done
 
