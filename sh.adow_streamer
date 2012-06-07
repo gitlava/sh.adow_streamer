@@ -52,9 +52,9 @@ standalone application.
 Usage example:
 
 . /usr/local/lib/sh.adow/sh.adow_streamer
-log_level 1 -
-log_level 3 - debug.log
-log_level 2 - errors.log debug.log
+wrp_level 1 -
+wrp_level 3 - debug.log
+wrp_level 2 - errors.log debug.log
 
 From this moment redirection works until the end of your script. It works 
 for every running application which can give output to stdout or/and stderr 
@@ -89,7 +89,7 @@ loglevel9() { exec 9>"${1}"; }
 #                       '--' could be placed in the beginning of OUTPUT...
 #                       in order to close level and not prevent producing
 #                       of any output.
-wrap_level() {
+wrp_level() {
     local level="${1}"
     shift # Level stored, all remaining params supposed to be target outputs.
 
@@ -131,7 +131,7 @@ wrap_level() {
                 tty 2>/dev/null >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
                 ;;
             *)
-                echo "${target}" >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
+                readlink -f "${target}" >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
                 ;;
         esac
     done
