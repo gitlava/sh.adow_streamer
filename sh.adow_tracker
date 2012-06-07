@@ -42,20 +42,27 @@
 # only as a part of Shadow Streamer, though you can adapt it for your needs.
 ################################################################################
 
-[ -d "${1}" ] || { echo "Wrong usage of Shadow Tracker." >&2; exit 1 }
+[ -d "${1}" ] || { echo "Wrong usage of Shadow Tracker." >&2; exit 1; }
 
 SHADOW_LEVEL="${1}"
 TARGETS=$(cat "${SHADOW_LEVEL}"/targets)
 PREFIX=$(cat "${SHADOW_LEVEL}"/prefix)
 
+# Send string to each target
+# String passed as argument
+# Targets passed with stdin
+multiply() {
+    while read target
+    do
+        echo "$@" >>"${target}"
+    done
+}
+
 # Main program cycle to track output and retranslate it to the desired
 # locations
 while read line <"${SHADOW_LEVEL}"/fifo
 do
-    echo "${TARGETS}" | \
-        while read target
-        do
-            eval echo "${prefix}""${line}" >>"${taget}"
-        done
+    string=$(eval echo "\"${PREFIX}\"")"${line}"
+    echo "${TARGETS}" | multiply "${string}"
 done
 
