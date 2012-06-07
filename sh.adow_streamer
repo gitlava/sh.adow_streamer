@@ -40,7 +40,7 @@
 
 # First of all, prevent stand-alone launch of the script
 STREAMER_BNAME='sh.adow_streamer'
-if ps wweo pid,cmd | grep -q "^\s*$$.*${STREAMER_BNAME}"
+if ps -p $$ wwo cmd= | grep -q "${STREAMER_BNAME}"
 then
     cat <<EOUSAGE
 Script to add logging functionality into other scripts with possibilities to 
@@ -109,6 +109,9 @@ wrap_level() {
         return
     fi
 
+    # Create config directory for level
+    mkdir -p "/tmp/${STREAMER_BNAME}.$$/${level}"
+
     local prefix="${SH_PREFIX}"
     # Set prefix if specified
     if [ "$1" = "-p" ]
@@ -135,8 +138,8 @@ wrap_level() {
 
     # Create FIFO and initialize redirection.
     mkfifo "/tmp/${STREAMER_BNAME}.$$/${level}/fifo"
+    /usr/lib/sh.adow/sh.adow_tracker "/tmp/${STREAMER_BNAME}.$$/${level}" &
     eval "loglevel${level}" "/tmp/${STREAMER_BNAME}.$$/${level}/fifo"
-    /usr/lib/sh.adow/sh.adow_tracker "/tmp/${STREAMER_BNAME}.$$/${level}"
 }
 
 
