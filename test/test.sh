@@ -10,5 +10,3 @@ echo Normal
 echo Error >&2
 echo Level-4 >&4
 
-sleep 10000
-
