@@ -1,5 +1,6 @@
 sh.adow-streamer
 ================
+[! Under heavy development]
 
 Logging implementation for SHELL-scripts.
 
