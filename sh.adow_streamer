@@ -70,6 +70,45 @@ EOUSAGE
     exit 1
 fi
 
+### DESCRIPTION ################################################################
+# Shadow Tracker is a part of the sh.adow_streamer functionality. There will be
+# one Tracker for every output level wrapped with the Shadow Streamer until your
+# script is finished.
+#
+# Shadow Tracker will read produced output from the FIFO and pass it to
+# the external locations
+#
+# Shadow Tracker is not supposed to be runned stand-alone. It have been designed
+# only as a part of Shadow Streamer, though you can adapt it for your needs.
+################################################################################
+tracker() {
+    [ -d "${1}" ] || { echo "Wrong usage of Shadow Tracker." >&2; exit 1; }
+
+    SHADOW_LEVEL="${1}"
+    TARGETS=$(cat "${SHADOW_LEVEL}"/targets)
+    PREFIX=$(cat "${SHADOW_LEVEL}"/prefix)
+
+    # Send string to each target
+    # String passed as argument
+    # Targets passed with stdin
+    multiply() {
+        while read target
+        do
+            echo "$@" >>"${target}"
+        done
+    }
+
+    exec >/dev/null 2>&1
+
+    # Main program cycle to track output and retranslate it to the desired
+    # locations
+    while read line <"${SHADOW_LEVEL}"/fifo
+    do
+        string=$(eval echo "\"${PREFIX}\"")"${line}"
+        echo "${TARGETS}" | multiply "${string}"
+    done
+}
+
 # Workaround for the issue when shell is unable to extend `exec $level>$path'.
 loglevel1() { exec 1>"${1}"; }
 loglevel2() { exec 2>"${1}"; }
@@ -128,7 +167,13 @@ wrp_level() {
     do
         case "${target}" in
             -)
-                tty 2>/dev/null >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
+                case "${level}" in
+                    1|2)
+                        # tty 2>/dev/null >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
+                        readlink -f /proc/$$/fd/${level} >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
+                        ;;
+                    *)
+                esac
                 ;;
             *)
                 readlink -f "${target}" >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
@@ -138,7 +183,7 @@ wrp_level() {
 
     # Create FIFO and initialize redirection.
     mkfifo "/tmp/${STREAMER_BNAME}.$$/${level}/fifo"
-    /usr/lib/sh.adow/sh.adow_tracker "/tmp/${STREAMER_BNAME}.$$/${level}" &
+    tracker "/tmp/${STREAMER_BNAME}.$$/${level}" &
     eval "loglevel${level}" "/tmp/${STREAMER_BNAME}.$$/${level}/fifo"
 }
 
