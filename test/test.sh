@@ -8,10 +8,8 @@ wrp_level 4 -p '[DEBUG] `date -Is`: ' ./level-4
 wrp_level 6 -- -p '[DEBUG] `date -Is`: ' ./level-4
 
 echo Normal message
-sleep 1
+sleep 2
 echo Error happens >&2
-sleep 1
 echo Level-4 message >&4
-sleep 1
 echo Level-6 message >&6
 
