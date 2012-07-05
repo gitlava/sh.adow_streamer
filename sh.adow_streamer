@@ -70,6 +70,8 @@ EOUSAGE
     exit 1
 fi
 
+exec 8>&1 9>&2
+
 ### DESCRIPTION ################################################################
 # Shadow Tracker is a part of the sh.adow_streamer functionality. There will be
 # one Tracker for every output level wrapped with the Shadow Streamer until your
@@ -81,6 +83,23 @@ fi
 # Shadow Tracker is not supposed to be runned stand-alone. It have been designed
 # only as a part of Shadow Streamer, though you can adapt it for your needs.
 ################################################################################
+multiply() {
+    sleep 2
+    while read target
+    do
+        case "${target}" in
+            '-1-')
+                echo "$@" >&8
+                ;;
+            '-2-')
+                echo "$@" >&9
+                ;;
+            *)
+                echo "$@" >>"${target}"
+        esac
+    done
+}
+
 tracker() {
     [ -d "${1}" ] || { echo "Wrong usage of Shadow Tracker." >&2; exit 1; }
 
@@ -91,13 +110,6 @@ tracker() {
     # Send string to each target
     # String passed as argument
     # Targets passed with stdin
-    multiply() {
-        while read target
-        do
-            echo "$@" >>"${target}"
-        done
-    }
-
     exec >/dev/null 2>&1
 
     # Main program cycle to track output and retranslate it to the desired
@@ -117,8 +129,8 @@ loglevel4() { exec 4>"${1}"; }
 loglevel5() { exec 5>"${1}"; }
 loglevel6() { exec 6>"${1}"; }
 loglevel7() { exec 7>"${1}"; }
-loglevel8() { exec 8>"${1}"; }
-loglevel9() { exec 9>"${1}"; }
+#loglevel8() { exec 8>"${1}"; }
+#loglevel9() { exec 9>"${1}"; }
 
 # Set up logging for specified channel
 # Args: LEVEL OUTPUT...
@@ -168,9 +180,13 @@ wrp_level() {
         case "${target}" in
             -)
                 case "${level}" in
-                    1|2)
+                    1)
+                        echo "-1-" >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
+                        ;;
+                    2)
+                        echo "-2-" >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
                         # tty 2>/dev/null >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
-                        readlink -f /proc/$$/fd/${level} >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
+                        # readlink -f /proc/$$/fd/${level} >>"/tmp/${STREAMER_BNAME}.$$/${level}/targets"
                         ;;
                     *)
                 esac

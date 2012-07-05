@@ -1,5 +1,3 @@
-#!/bin/sh
-
 . /usr/lib/sh.adow/sh.adow_streamer
 
 wrp_level 1 -p '[INFO] `date -Is`: '  - ./stdout
