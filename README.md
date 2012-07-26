@@ -1,7 +1,7 @@
 sh.adow-streamer
 ================
 
-Logging implementation for SHELL-scripts.
+Logging implementation for shell-scripts.
 
 Usage: Include this library in your script and then call corresponding
 functions in order to initialize all necessary redirection. Can multiply
