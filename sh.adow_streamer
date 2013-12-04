@@ -1,19 +1,19 @@
 #!/bin/sh
 #
- 
+
 ### LICENSE ####################################################################
 # Copyright (c) 2012, Eugene 'lava' Lavnikevich
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met: 
-# 
+# modification, are permitted provided that the following conditions are met:
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer. 
+#    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution. 
-# 
+#    and/or other materials provided with the distribution.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,9 +24,9 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # The views and conclusions contained in the software and documentation are those
-# of the authors and should not be interpreted as representing official policies, 
+# of the authors and should not be interpreted as representing official policies,
 # either expressed or implied, of the FreeBSD Project.
 ################################################################################
 
@@ -43,10 +43,10 @@ STREAMER_BNAME='sh.adow_streamer'
 if ps -p $$ wwo cmd= | grep -q "${STREAMER_BNAME}"
 then
     cat <<EOUSAGE
-Script to add logging functionality into other scripts with possibilities to 
+Script to add logging functionality into other scripts with possibilities to
 setup different levels and different output directions.
 
-This shell-script is developed as a "library" for other scripts, but not as a 
+This shell-script is developed as a "library" for other scripts, but not as a
 standalone application.
 
 Usage example:
@@ -56,8 +56,8 @@ wrp_level 1 -
 wrp_level 3 - debug.log
 wrp_level 2 - errors.log debug.log
 
-From this moment redirection works until the end of your script. It works 
-for every running application which can give output to stdout or/and stderr 
+From this moment redirection works until the end of your script. It works
+for every running application which can give output to stdout or/and stderr
 or/and level3:
   - stdout of every command will continue to be produced on screen;
   - level 3 is supposed to be debug level and will go to screen and to the
